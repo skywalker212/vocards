@@ -24,5 +24,6 @@ def drop_words_table():
         cursor = conn.cursor()
         cursor.execute("DROP TABLE IF EXISTS WORDS")
         print("Words table dropped successfully!")
+        cursor.close()
     except sqlite3.Error as e:
         print("some error occured:", e.args[0])
