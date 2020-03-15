@@ -38,10 +38,23 @@ def insert_words(word_list):
         todays_date = datetime.utcnow().strftime("%d/%m/%Y")
         todays_utc_seconds = time.mktime(datetime.strptime(todays_date, "%d/%m/%Y").timetuple())
         cursor = conn.cursor()
-        words = [ (word, todays_utc_seconds) for word in word_list ]
-        cursor.executemany('INSERT INTO WORDS (WORD, ADDITION_DATE) VALUES (?,?)', words)
+        words = [ (word, todays_utc_seconds, count) for (word, count) in word_counts(word_list, cursor) ]
+        for (word, date, count) in words:
+            if count:
+                cursor.execute('UPDATE WORDS SET COUNT=? WHERE WORD=?', (count+1, word))
+            else:
+                cursor.execute('INSERT INTO WORDS (WORD, ADDITION_DATE) VALUES (?,?)', (word, date))
         print("Successfully inserted {} words in table".format(len(words)))
         conn.commit()
         conn.close()
     except sqlite3.Error as e:
         print("some error occured:", e.args[0])
+
+def word_counts(word_list, cursor):
+    for word in word_list:
+        cursor.execute("SELECT COUNT FROM WORDS WHERE WORD=?", (word,))
+        record = cursor.fetchone()
+        if record:
+            yield (word, record[0])
+        else:
+            yield (word, None)

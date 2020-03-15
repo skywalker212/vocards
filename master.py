@@ -53,7 +53,7 @@ def execute_insert_input (arguments):
                 except IOError as e:
                     print("Error while reading from file")
             else:
-                print(word_count)
+                insert_words([ word for word in [input(str(index+1)+": ") for index in range(int(word_count))]])
         else:
             print("pleae provide arguments in valid format")
     else:
